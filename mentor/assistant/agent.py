@@ -1,5 +1,6 @@
 from enum import StrEnum
 from functools import cache
+from pathlib import Path
 from uuid import UUID
 
 from django.conf import settings
@@ -9,6 +10,7 @@ from langchain_postgres import PostgresChatMessageHistory
 from langchain_together import ChatTogether
 from psycopg_pool import ConnectionPool
 
+from mentor.assistant.models import ChatMessage
 from mentor.assistant.settings import ModelSettings, PostgreSettings
 
 
@@ -23,7 +25,7 @@ class PromptName(StrEnum):
     GENERATE_TITLE = "generate_title"
 
 
-def get_prompt_file_path(prompt_name: PromptName, prompt_type: PromptType) -> str:
+def get_prompt_file_path(prompt_name: PromptName, prompt_type: PromptType) -> Path:
     return (
         settings.BASE_DIR
         / "assistant"
@@ -32,7 +34,7 @@ def get_prompt_file_path(prompt_name: PromptName, prompt_type: PromptType) -> st
     )
 
 
-def read_text_file(file_path: str) -> str:
+def read_text_file(file_path: str | Path) -> str:
     with open(file_path, encoding="utf-8") as file:
         return file.read()
 
@@ -51,8 +53,7 @@ def get_connection_pool() -> ConnectionPool:
         conninfo=f"dbname={settings.pg_db_name} user={settings.pg_username} "
         f"password={settings.pg_password.get_secret_value()} host={settings.pg_host} "
         f"port={settings.pg_port}",
-        # TODO: What is a good max size for the connection pool?
-        # max_size=10,
+        max_size=10,
     )
 
 
@@ -66,16 +67,13 @@ def get_model() -> ChatTogether:
     )
 
 
-def get_session_history(table_name: str):
-    def _get_session_history(session_id):
-        with get_connection_pool().connection() as conn:
-            return PostgresChatMessageHistory(
-                table_name,
-                session_id,
-                sync_connection=conn,
-            )
-
-    return _get_session_history
+def get_session_history(session_id):
+    with get_connection_pool().connection() as conn:
+        return PostgresChatMessageHistory(
+            ChatMessage._meta.db_table,
+            session_id,
+            sync_connection=conn,
+        )
 
 
 def get_prompt_template(prompt_name: PromptName) -> ChatPromptTemplate:
@@ -94,8 +92,7 @@ def get_chain_with_history(prompt_name: PromptName):
     chain = prompt | get_model()
     return RunnableWithMessageHistory(
         chain,
-        # TODO: move this table name to a settings file??
-        get_session_history(table_name="chat_message"),
+        get_session_history,
         input_messages_key="question",
         history_messages_key="history",
     )

@@ -22,7 +22,9 @@ def analyze_text(
         response = generate_title(text)
         if not response:
             return None
-        title = response.content
+        final_title = response.content
+    else:
+        final_title = title
 
     try:
         user = User.objects.get(id=user_id)
@@ -32,7 +34,7 @@ def analyze_text(
     ChatSession.objects.create(
         id=session_id,
         user=user,
-        title=title,
+        title=final_title,
     )
 
     response = agent_analyze_text(session_id=session_id, text=text)

@@ -1,12 +1,9 @@
 from django.contrib.auth.models import User
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = extend_schema_field({"type": "string", "format": "password"})(
-        serializers.CharField(write_only=True, style={"input_type": "password"})
-    )
+    password = serializers.CharField(write_only=True, style={"input_type": "password"})
 
     class Meta:
         model = User

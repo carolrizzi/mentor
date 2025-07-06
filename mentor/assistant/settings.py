@@ -12,6 +12,7 @@ class Settings(MentorBaseSettings):
     access_token_lifetime_minutes: int = 30
     refresh_token_lifetime_days: int = 2
     redis_url: str = "redis://localhost:6379/0"
+    # TODO: Add the env var below to composer
     # redis: str = "redis://redis:6379/0"
 
 

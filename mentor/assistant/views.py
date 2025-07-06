@@ -8,10 +8,12 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ChatMessage, ChatSession
+from .models import ChatSession
 from .serializers import (
     ErrorResponseSerializer,
     QuestionRequestSerializer,
+    SessionDetailsResponseSerializer,
+    SessionResponseSerializer,
     TaskCreatedResponseSerializer,
     TaskStatusResponseSerializer,
     TextAnalysisRequestSerializer,
@@ -20,26 +22,30 @@ from .serializers import (
 from .tasks import analyze_text, follow_up_question
 
 
-def valid_user_session(user: User, session_id: UUID) -> bool:
-    try:
-        ChatSession.objects.get(user=user, id=session_id)
-        return True
-    except ChatSession.DoesNotExist:
-        return False
+def get_invalid_session_response(user: User) -> Response:
+    data = ErrorResponseSerializer().to_representation(
+        {
+            "error": f"Invalid session for user {user.username} (user id: {user.id}).",
+            "code": status.HTTP_400_BAD_REQUEST,
+        }
+    )
+    return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_invalid_session_response(user: User):
+def get_task_created_response(session_id: UUID | str, task_id: UUID | str) -> Response:
     return Response(
-        data=ErrorResponseSerializer(
-            error=f"Invalid session for user {user.username} (user id: {user.id}).",
-            code=status.HTTP_400_BAD_REQUEST,
-        ).data,
-        status=status.HTTP_400_BAD_REQUEST,
+        data=TaskCreatedResponseSerializer().to_representation(
+            {
+                "session_id": session_id,
+                "task_id": task_id,
+            }
+        ),
+        status=status.HTTP_201_CREATED,
     )
 
 
 @extend_schema(
-    summary="User Registration",
+    summary="Register a new user",
     description="Register a new user with a username, email (optional), and password.",
 )
 class UserRegistrationView(generics.CreateAPIView):
@@ -49,31 +55,22 @@ class UserRegistrationView(generics.CreateAPIView):
 
 class TextAnalysisView(APIView):
     @extend_schema(
-        summary="List user's text analyses.",
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=SessionResponseSerializer(many=True),
+                description="List of text analysis sessions.",
+            ),
+        },
+        summary="List all text analyses",
         description="List all sessions of text analysis created by the user.",
     )
     def get(self, request):
         user_sessions = ChatSession.objects.filter(user=request.user)
-        sessions = [
-            {
-                "session_id": str(session.id),
-                "title": session.title,
-                "created_at": session.created_at.isoformat(),
-            }
-            for session in user_sessions
-        ]
-        # sessions = [
-        #     TextAnalysisResponseSerializer(
-        #         session_id=session.id,
-        #         title=session.title,
-        #         created_at=session.created_at,
-        #     )
-        # ]
-        # TODO: serialize this response properly
+        serializer = SessionResponseSerializer(user_sessions, many=True)
+
         return Response(
-            {
-                "sessions": sessions,
-            }
+            data=serializer.data,
+            status=status.HTTP_200_OK,
         )
 
     @extend_schema(
@@ -105,14 +102,7 @@ class TextAnalysisView(APIView):
             text=serializer.validated_data.get("text"),
             title=title,
         )
-
-        return Response(
-            data=TaskCreatedResponseSerializer(
-                session_id=session_id,
-                task_id=result.id,
-            ).data,
-            status=status.HTTP_201_CREATED,
-        )
+        return get_task_created_response(session_id=session_id, task_id=result.id)
 
 
 class SessionManagementView(APIView):
@@ -121,38 +111,41 @@ class SessionManagementView(APIView):
     """
 
     @extend_schema(
-        summary="Retrieve a particular text analysis",
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=SessionDetailsResponseSerializer,
+                description="Details of the text analysis session.",
+            ),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=ErrorResponseSerializer,
+                description="Invalid session ID or session does not belong to user.",
+            ),
+        },
+        summary="Retrieve a text analysis",
         description="Retrieve the details of a specific text analysis session, "
         + "including the messages exchanged between the user and the AI assistant.",
     )
     def get(self, request, session_id):
         try:
             chat_session = ChatSession.objects.get(user=request.user, id=session_id)
-            session_messages = ChatMessage.objects.filter(session=session_id).order_by(
-                "id"
-            )
-            messages = [
-                {
-                    "message_id": message.id,
-                    "created_at": message.created_at.isoformat(),
-                    "content": message.message,
-                }
-                for message in session_messages
-            ]
-            # TODO: serialize this response properly
+            serializer = SessionDetailsResponseSerializer(chat_session)
             return Response(
-                {
-                    "session_id": str(chat_session.id),
-                    "title": chat_session.title,
-                    "created_at": chat_session.created_at.isoformat(),
-                    "messages": messages,
-                },
+                data=serializer.data,
                 status=status.HTTP_200_OK,
             )
         except ChatSession.DoesNotExist:
             return get_invalid_session_response(user=request.user)
 
     @extend_schema(
+        responses={
+            status.HTTP_204_NO_CONTENT: OpenApiResponse(
+                description="Text analysis session deleted successfully.",
+            ),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=ErrorResponseSerializer,
+                description="Invalid session ID or session does not belong to user.",
+            ),
+        },
         summary="Delete a text analysis",
         description="Delete a specific text analysis session.",
     )
@@ -175,7 +168,7 @@ class FollowUpQuestionView(APIView):
             ),
             status.HTTP_400_BAD_REQUEST: OpenApiResponse(
                 response=ErrorResponseSerializer,
-                description="Invalid session or request data.",
+                description="Invalid session ID or session does not belong to user.",
             ),
         },
         summary="Ask a follow-up question",
@@ -197,13 +190,7 @@ class FollowUpQuestionView(APIView):
         result = follow_up_question.delay(
             session_id=session_id, question=serializer.validated_data.get("question")
         )
-        return Response(
-            data=TaskCreatedResponseSerializer(
-                session_id=session_id,
-                task_id=result.id,
-            ).data,
-            status=status.HTTP_201_CREATED,
-        )
+        return get_task_created_response(session_id=session_id, task_id=result.id)
 
 
 class TaskStatusView(APIView):
@@ -230,36 +217,44 @@ class TaskStatusView(APIView):
         res = AsyncResult(task_id)
         if res.status == "PENDING":
             return Response(
-                data=TaskStatusResponseSerializer(
-                    task_id=task_id,
-                    status=res.status,
-                    result=None,
-                ).data,
+                data=TaskStatusResponseSerializer().to_representation(
+                    {
+                        "task_id": task_id,
+                        "status": res.status,
+                        "result": None,
+                    }
+                ),
                 status=status.HTTP_202_ACCEPTED,
             )
         elif res.status == "SUCCESS":
             return Response(
-                data=TaskStatusResponseSerializer(
-                    task_id=task_id,
-                    status=res.status,
-                    result=res.result,
-                ).data,
+                data=TaskStatusResponseSerializer().to_representation(
+                    {
+                        "task_id": task_id,
+                        "status": res.status,
+                        "result": res.result,
+                    }
+                ),
                 status=status.HTTP_200_OK,
             )
         elif res.status == "FAILURE":
             return Response(
-                data=TaskStatusResponseSerializer(
-                    task_id=task_id,
-                    status=res.status,
-                    error=str(res.result),
-                ).data,
+                data=TaskStatusResponseSerializer().to_representation(
+                    {
+                        "task_id": task_id,
+                        "status": res.status,
+                        "error": str(res.result),
+                    }
+                ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         else:
             return Response(
-                data=TaskStatusResponseSerializer(
-                    task_id=task_id,
-                    status=res.status,
-                ).data,
+                data=TaskStatusResponseSerializer().to_representation(
+                    {
+                        "task_id": task_id,
+                        "status": res.status,
+                    }
+                ),
                 status=status.HTTP_202_ACCEPTED,
             )

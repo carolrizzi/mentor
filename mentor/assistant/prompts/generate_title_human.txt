@@ -1,0 +1,4 @@
+Gere um título para o texto a seguir. Retorne somente o título gerado e nada mais.
+
+TEXTO:
+

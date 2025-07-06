@@ -1,0 +1,8 @@
+Analise o texto educacional a seguir e forneça uma reposta que:
+1. Extraia e liste os principais conceitos no texto
+2. Forneça uma estimativa de tempo de estudo
+3. Forneça uma estimativa de nível de dificuldade no estudo
+4. Se aplicavel, forneça sugestões de método e plano de estudo.
+
+TEXTO:
+

@@ -1,0 +1,22 @@
+{
+    "python.testing.pytestArgs": [
+        "--config-file=config/pytest.ini",
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.envFile": "${workspaceFolder}/mentor/.env",
+    "mypy.configFile": "./config/mypy.ini",
+    "ruff.configuration": "${workspaceFolder}/config/ruff.toml",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit"
+        }
+    },
+    "autoDocstring.docstringFormat": "google",
+    "autoDocstring.quoteStyle": "\"\"\"",
+    "mypy.runUsingActiveInterpreter": true
+}

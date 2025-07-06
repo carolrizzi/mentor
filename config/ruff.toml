@@ -1,0 +1,21 @@
+line-length = 88
+indent-width = 4
+target-version = "py313"
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+indent-style = "space"
+
+[lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # Pyflakes
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "I",    # isort
+]
+ignore = [
+    "B006"  # Do not use mutable data structures for argument defaults
+]

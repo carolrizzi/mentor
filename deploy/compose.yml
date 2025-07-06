@@ -15,7 +15,6 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   redis:
     container_name: mentor_redis
@@ -26,47 +25,35 @@ services:
     volumes:
       - redis_data:/data
 
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   container_name: mentor_ollama
-  #   ports:
-  #     - "11434:11434"
-  #   volumes:
-  #     - ollama_data:/root/.ollama
-  #   entrypoint: >
-  #     bash -c "
-  #       ollama serve &
-  #       sleep 3 &&
-  #       ollama pull mistral &&
-  #       tail -f /dev/null
-  #     "
+  api:
+    container_name: mentor_api
+    build:
+      context: ../
+    command: poetry run python mentor/manage.py runserver 0.0.0.0:8000
+    environment:
+      PG_PASSWORD: mentor
+      PG_HOST: db
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
 
-  # api:
-  #   container_name: mentor_api
-  #   build:
-  #     context: ../../
-  #   command: poetry run python manage.py runserver 0.0.0.0:8000
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     - db
-  #     - redis
-      # networks:
-      # - mentor_network
-
-  # celery:
-  #   container_name: mentor_celery
-  #   build:
-  #     context: ../../
-  #   command: poetry run celery -A mentor worker --loglevel=info
-  #   depends_on:
-  #     - redis
-  #     - api
-
-# networks:
-#   mentor_network:
+  celery:
+    container_name: mentor_celery
+    build:
+      context: ../
+    command: poetry run celery -A mentor.core worker --loglevel=info
+    environment:
+      PG_PASSWORD: mentor
+      PG_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      TOGETHER_API_KEY: ${TOGETHER_API_KEY}
+    depends_on:
+      - redis
+      - api
 
 volumes:
   db_data:
   redis_data:
-  # ollama_data:

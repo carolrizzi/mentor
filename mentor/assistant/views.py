@@ -67,6 +67,7 @@ class TextAnalysisView(APIView):
         },
         summary="List all text analyses",
         description="List all sessions of text analysis created by the user.",
+        operation_id="analysis_list",
     )
     def get(self, request):
         user_sessions = ChatSession.objects.filter(user=request.user)
@@ -128,6 +129,7 @@ class SessionManagementView(APIView):
         summary="Retrieve a text analysis",
         description="Retrieve the details of a specific text analysis session, "
         + "including the messages exchanged between the user and the AI assistant.",
+        operation_id="analysis_get_by_id",
     )
     def get(self, request, session_id):
         try:

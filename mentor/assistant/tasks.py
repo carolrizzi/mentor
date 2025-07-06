@@ -3,12 +3,11 @@ from uuid import UUID
 from celery.result import AsyncResult
 from django.contrib.auth.models import User
 
-from mentor.celery import app
-
-from .agent import analyze_text as agent_analyze_text
-from .agent import follow_up_question as agent_follow_up_question
-from .agent import generate_title
-from .models import ChatSession
+from mentor.assistant.agent import analyze_text as agent_analyze_text
+from mentor.assistant.agent import follow_up_question as agent_follow_up_question
+from mentor.assistant.agent import generate_title
+from mentor.assistant.models import ChatSession
+from mentor.core.celery import app
 
 
 @app.task

@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
-from assistant.settings import PostgreSettings, Settings
+from mentor.assistant.settings import PostgreSettings, Settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "assistant",
+    "mentor.assistant",
     "drf_spectacular",
 ]
 
@@ -56,7 +56,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "mentor.urls"
+ROOT_URLCONF = "mentor.core.urls"
 
 TEMPLATES = [
     {
@@ -73,7 +73,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "mentor.wsgi.application"
+WSGI_APPLICATION = "mentor.core.wsgi.application"
 
 
 db_settings = PostgreSettings()

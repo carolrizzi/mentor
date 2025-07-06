@@ -8,22 +8,22 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ChatSession
-from .serializers.chat import (
+from mentor.assistant.models import ChatSession
+from mentor.assistant.serializers.chat import (
     QuestionRequestSerializer,
     SessionDetailsResponseSerializer,
     SessionResponseSerializer,
     TextAnalysisRequestSerializer,
 )
-from .serializers.manage import (
+from mentor.assistant.serializers.manage import (
     ErrorResponseSerializer,
     UserRegistrationSerializer,
 )
-from .serializers.task import (
+from mentor.assistant.serializers.task import (
     TaskCreatedResponseSerializer,
     TaskStatusResponseSerializer,
 )
-from .tasks import analyze_text, follow_up_question
+from mentor.assistant.tasks import analyze_text, follow_up_question
 
 
 def get_invalid_session_response(user: User) -> Response:

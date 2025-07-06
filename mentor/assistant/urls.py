@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import (
+from mentor.assistant.views import (
     FollowUpQuestionView,
     SessionManagementView,
     TaskStatusView,

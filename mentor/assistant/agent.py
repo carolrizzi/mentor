@@ -9,7 +9,7 @@ from langchain_postgres import PostgresChatMessageHistory
 from langchain_together import ChatTogether
 from psycopg_pool import ConnectionPool
 
-from .settings import ModelSettings, PostgreSettings
+from mentor.assistant.settings import ModelSettings, PostgreSettings
 
 
 class PromptType(StrEnum):

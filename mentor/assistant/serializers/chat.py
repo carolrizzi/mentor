@@ -1,5 +1,6 @@
-from assistant.models import ChatMessage, ChatSession
 from rest_framework import serializers
+
+from mentor.assistant.models import ChatMessage, ChatSession
 
 
 class TextAnalysisRequestSerializer(serializers.Serializer):

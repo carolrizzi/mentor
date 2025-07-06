@@ -9,15 +9,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import ChatSession
-from .serializers import (
-    ErrorResponseSerializer,
+from .serializers.chat import (
     QuestionRequestSerializer,
     SessionDetailsResponseSerializer,
     SessionResponseSerializer,
+    TextAnalysisRequestSerializer,
+)
+from .serializers.manage import (
+    ErrorResponseSerializer,
+    UserRegistrationSerializer,
+)
+from .serializers.task import (
     TaskCreatedResponseSerializer,
     TaskStatusResponseSerializer,
-    TextAnalysisRequestSerializer,
-    UserRegistrationSerializer,
 )
 from .tasks import analyze_text, follow_up_question
 

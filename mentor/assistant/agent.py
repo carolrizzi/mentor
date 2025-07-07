@@ -212,13 +212,13 @@ def get_agent() -> Assistant:
     This function can be used to get the specific implementation of the assistant.
     """
     ai_platform = Settings().ai_platform
-    if ai_platform == AiPlatform.TOGETHER_AI:
-        return TogetherAiAssistant()
-    if ai_platform == AiPlatform.OPENAI:
-        return OpenAiAssistant()
-    if ai_platform == AiPlatform.AWS_BEDROCK:
-        return AwsBedrockAssistant()
-    if ai_platform == AiPlatform.AZURE_OPENAI:
-        return AzureOpenAiAssistant()
-    else:
-        raise ValueError(f"Unsupported AI platform: {ai_platform.value}")
+    match ai_platform:
+        case AiPlatform.TOGETHER_AI:
+            return TogetherAiAssistant()
+        case AiPlatform.OPENAI:
+            return OpenAiAssistant()
+        case AiPlatform.AZURE_OPENAI:
+            return AzureOpenAiAssistant()
+        case AiPlatform.AWS_BEDROCK:
+            return AwsBedrockAssistant()
+    raise ValueError(f"Unsupported AI platform: {ai_platform.value}")

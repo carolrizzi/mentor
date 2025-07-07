@@ -22,6 +22,8 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   api:
     container_name: mentor_api
@@ -50,10 +52,11 @@ services:
       PG_PASSWORD: ${PG_PASSWORD:-mentor}
       PG_HOST: db
       REDIS_URL: redis://redis:6379/0
-      TOGETHER_API_KEY: ${API_KEY?Please set the API_KEY environment variable}
+      API_KEY: ${API_KEY?Please set the API_KEY environment variable}
     depends_on:
       - redis
       - api
 
 volumes:
   db_data:
+  redis_data:

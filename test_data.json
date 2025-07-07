@@ -1,0 +1,110 @@
+[
+    {
+        "titulo": "Ciclos Biogeoquímicos",
+        "text": "Os ciclos biogeoquímicos são processos naturais que reciclam elementos essenciais, como carbono, nitrogênio e água, através dos seres vivos e do ambiente. No ciclo do carbono, plantas utilizam gás carbônico na fotossíntese para produzir energia, enquanto animais e plantas liberam CO₂ na respiração. Já o ciclo da água envolve evaporação, condensação e precipitação, garantindo a disponibilidade de água doce nos ecossistemas. Esses ciclos são fundamentais para manter o equilíbrio ecológico e a vida na Terra.",
+        "questions": [
+            "Como os seres humanos impactam esses ciclos que você mencionou?",
+            "O que é fotossíntese?",
+            "O que acontece na evaporação?"
+        ]
+    },
+    {
+        "titulo": "Independência do Brasil",
+        "text": "A Independência do Brasil ocorreu em 7 de setembro de 1822, quando Dom Pedro I proclamou a separação de Portugal às margens do rio Ipiranga, em São Paulo. Diversos fatores contribuíram para o desejo de independência, como altos impostos, restrições comerciais e o sentimento nacionalista crescente. Mesmo após o grito da independência, o Brasil enfrentou conflitos internos para consolidar sua soberania e organizar o novo governo imperial.",
+        "questions": [
+            "O que aconteceu no Brasil após esse evento?",
+            "Quem foi Dom Pedro I?",
+            "Por que o Brasil queria se separar de Portugal?"
+        ]
+    },
+    {
+        "titulo": "Revolução Industrial",
+        "text": "A Revolução Industrial começou na Inglaterra no século XVIII, marcada pelo uso de máquinas a vapor e novas tecnologias que aumentaram a produção nas fábricas. Isso causou mudanças sociais profundas, com crescimento das cidades, surgimento do operariado e aumento da produção em larga escala. Também trouxe problemas, como más condições de trabalho e poluição.",
+        "questions": [
+            "Quais problemas sociais surgiram nesse período mencionado?",
+            "O que era a máquina a vapor?",
+            "Por que a Inglaterra foi o berço da Revolução Industrial?"
+        ]
+    },
+    {
+        "titulo": "Sistema Solar",
+        "text": "O Sistema Solar é composto pelo Sol, planetas, satélites naturais, asteroides, cometas e outros corpos celestes. Os planetas são divididos em rochosos, como Mercúrio, Vênus, Terra e Marte, e gasosos, como Júpiter, Saturno, Urano e Netuno. O Sol é a principal fonte de energia e mantém todos os corpos em órbita por sua força gravitacional.",
+        "questions": [
+            "Quais são os planetas rochosos mencionados no texto?",
+            "O que é gravidade?",
+            "O que diferencia planetas gasosos dos rochosos?"
+        ]
+    },
+    {
+        "titulo": "Romantismo na Literatura Brasileira",
+        "text": "O Romantismo no Brasil iniciou-se no século XIX, influenciado pela independência do país. Os escritores românticos exaltavam a natureza, o nacionalismo, os sentimentos pessoais e os heróis idealizados. Autores como José de Alencar e Gonçalves Dias se destacaram, contribuindo para a construção da identidade cultural brasileira.",
+        "questions": [
+            "Quais foram alguns temas principais desse movimento literário mencionado?",
+            "Quem foi José de Alencar?",
+            "Quando começou o Romantismo no Brasil?"
+        ]
+    },
+    {
+        "titulo": "Estados Físicos da Matéria",
+        "text": "A matéria pode existir nos estados sólido, líquido ou gasoso. No estado sólido, as partículas estão bem organizadas e próximas, conferindo forma e volume fixos. No líquido, as partículas estão mais afastadas, permitindo fluidez. Já no estado gasoso, as partículas estão muito separadas e se movimentam livremente, ocupando todo o espaço disponível.",
+        "questions": [
+            "Como estão organizadas as partículas no estado sólido mencionado?",
+            "O que é o estado gasoso?",
+            "Por que líquidos têm fluidez?"
+        ]
+    },
+    {
+        "titulo": "Climas do Brasil",
+        "text": "O Brasil possui diversos tipos de clima, como o equatorial, tropical, semiárido e subtropical. O clima equatorial ocorre na Amazônia e apresenta altas temperaturas e chuvas abundantes o ano todo. Já o semiárido é típico do Nordeste, com altas temperaturas e pouca chuva. A diversidade climática influencia a vegetação, a agricultura e a vida das pessoas.",
+        "questions": [
+            "Qual região do Brasil apresenta o clima equatorial mencionado?",
+            "O que é clima semiárido?",
+            "Como o clima influencia a agricultura?"
+        ]
+    },
+    {
+        "titulo": "Segunda Guerra Mundial",
+        "text": "A Segunda Guerra Mundial ocorreu entre 1939 e 1945, envolvendo diversos países, principalmente as potências do Eixo (Alemanha, Itália, Japão) contra os Aliados (Estados Unidos, União Soviética, Reino Unido, entre outros). Foi marcada por batalhas sangrentas, bombas atômicas em Hiroshima e Nagasaki e milhões de mortos. Após o conflito, o mundo entrou na Guerra Fria.",
+        "questions": [
+            "Quais países faziam parte do Eixo mencionado?",
+            "O que foi a bomba atômica?",
+            "Quando terminou a Segunda Guerra Mundial?"
+        ]
+    },
+    {
+        "titulo": "Teorema de Pitágoras",
+        "text": "O Teorema de Pitágoras é usado para calcular o comprimento dos lados de um triângulo retângulo. Ele afirma que o quadrado da hipotenusa é igual à soma dos quadrados dos catetos. É representado pela fórmula a² = b² + c², onde a é a hipotenusa, e b e c são os catetos.",
+        "questions": [
+            "O que significa a fórmula apresentada no texto?",
+            "O que é hipotenusa?",
+            "Em que tipo de triângulo se aplica o Teorema de Pitágoras?"
+        ]
+    },
+    {
+        "titulo": "Filosofia de Sócrates",
+        "text": "Sócrates foi um filósofo grego da antiguidade conhecido por ensinar através de diálogos e perguntas, método chamado maiêutica. Ele acreditava que o autoconhecimento era essencial e dizia que 'só sei que nada sei'. Não deixou textos escritos; tudo o que sabemos vem dos relatos de seus discípulos, como Platão.",
+        "questions": [
+            "Como se chama o método de ensino mencionado no texto?",
+            "O que significa 'só sei que nada sei'?",
+            "Quem foi Platão em relação a Sócrates?"
+        ]
+    },
+    {
+        "titulo": "Arte Modernista Brasileira",
+        "text": "O Modernismo brasileiro surgiu no início do século XX, buscando romper com as tradições artísticas europeias. Os artistas queriam criar uma arte genuinamente brasileira, misturando linguagens, cores fortes e temas nacionais. A Semana de Arte Moderna de 1922, em São Paulo, foi um marco importante, reunindo nomes como Mário de Andrade e Anita Malfatti.",
+        "questions": [
+            "Qual evento foi um marco para o movimento mencionado?",
+            "Quem foi Anita Malfatti?",
+            "O que o Modernismo queria romper?"
+        ]
+    },
+    {
+        "titulo": "Internet das Coisas (IoT)",
+        "text": "Internet das Coisas (IoT) refere-se à conexão de objetos do dia a dia à internet, permitindo que eles coletem e troquem dados. Exemplos incluem lâmpadas inteligentes, relógios fitness e sensores em fábricas. A IoT promete tornar as cidades mais inteligentes e eficientes, mas também levanta preocupações sobre privacidade e segurança.",
+        "questions": [
+            "Quais exemplos de objetos conectados foram mencionados?",
+            "O que é IoT?",
+            "Quais preocupações existem em relação à IoT?"
+        ]
+    }
+]

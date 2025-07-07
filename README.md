@@ -1,15 +1,21 @@
 
-# Mentor
+# 1. Mentor
 
 Mentor is a AI-powered educational assistant that allows users to analyze text and ask follow-up questions based on the analysis. It is designed to help users gain insights from their text content and engage in meaningful conversations with an AI assistant.
 
-## AI Assistant
+## 1.1. AI Assistant
 
-The AI Assistant is the core component of the Mentor application. We use the Together AI platform as our cloud provider for AI models. It has a range of free large language models, which facilitates low-cost development of AI-powered applications without the need for local model deployment.
+The AI Assistant is the core component of the Mentor application. We use the Together AI platform as our cloud provider for AI models. Together AI offers a range of free large language models, which facilitates low-cost development of AI-powered applications without the need for local model deployment.
 
 We decided to use the model `Llama-3.3-70B-Instruct-Turbo-Free` for being among the most powerful free models available on Together AI. It is capable of handling reasonably complex conversations, as well as maintaining contextual understanding across multiple interactions.
 
-# Tech Stack
+However, if desired, the user/developer can change the assistant underlying model and model provider platform by extending the `Assistant` class and updating the model-related environment variables (see `.env.example` for details). The Mentor application is designed to be flexible and can be adapted to use other models or providers in the future. The AI Assistant is implemented as an abstract class, allowing for easy extension and customization.
+
+To implement a new AI Assistant, you can create a subclass of the `mentor.assistant.agent.Assistant` class and implement the `model` property to return the specific model instance you want to use. This allows for plug-and-play functionality, enabling the application to switch between different AI models or providers as needed.
+
+For convenience, the `agent` module already provides `Assistant` interfaces for OpenAI, Azure OpenAI, and AWS Bedrock, which can be implemented in the future if desired. The current implementation uses the Together AI platform, but the architecture is designed to be flexible enough to accommodate other providers.
+
+# 2. Tech Stack
 
 - **Django** for the backend
 - **PostgreSQL** for the database
@@ -25,14 +31,14 @@ We decided to use the model `Llama-3.3-70B-Instruct-Turbo-Free` for being among 
 - **Pytest** for testing
 - **Tox** for testing and linting automation
 
-# Running the Project
+# 3. Running Mentor
 
-## Requirements
+## 3.1. Requirements
 
 1. Docker Compose
 1. A [Together AI](https://www.together.ai/) account
 
-## Installation
+## 3.2. Installation and Execution
 
 1. Clone the repository:
    ```bash
@@ -40,17 +46,18 @@ We decided to use the model `Llama-3.3-70B-Instruct-Turbo-Free` for being among 
    cd mentor
    ```
 
-1. Create a file `deploy/.env` and add a variable `API_KEY` containing your Together AI API key. Alternatively, you can export the variable in your terminal session.
+1. Create a file `deploy/.env` and add a variable `API_KEY` containing your Together AI API key. Alternatively, you can export the variable in your terminal session. Most environment variables have default values, but you can override them in the `.env` file or by exporting them in your terminal session. The `.env.example` file contains all the available environment variables and their default values.
 
 1. Run docker compose:
    ```bash
    cd deploy
    docker compose up -d
    ```
+   If you are running it for the first time, it might take some time to initialize the database after all containers are up and running. You can check the logs of the `mentor_api` container to see when the database is ready and the api is up and running.
 
 Once the composer is up and running, you can access the API throught the swagger UI at http://127.0.0.1:8000/api/schema/swagger-ui/#/. The API documentation will be available at http://127.0.0.1:8000/api/schema/redoc/.
 
-## Usage
+## 3.3. Usage
 
 With the project running, open the [Swagger UI](http://127.0.0.1:8000/api/schema/swagger-ui/#/).
 
@@ -72,18 +79,13 @@ An entire session and all its messages can be deleted by sending a DELETE reques
 
 For a full API reference, please refer to the [API documentation](http://127.0.0.1:8000/api/schema/redoc/).
 
-# Development
+# 4. Development
 
 For local development, you will require Python 3.13.3 or higher (or Pyenv Python 3.13.3 installed) and Poetry for dependency management. You can set up your development environment by following these steps:
 
 To set up your development environment, run the following in the repository root to install the required dependencies:
 ```bash
 poetry install
-```
-
-To run the unit tests, run:
-```bash
-poetry run tox
 ```
 
 To test the project, you can run it either with Docker Compose or locally with Poetry. To run it locally, first run docker compose with just the PostgreSQL and Redis services:
@@ -103,11 +105,18 @@ And the celery worker with:
 poetry run celery -A mentor.core worker --loglevel=info
 ```
 
-# Next Steps
+To run the integration tests, run:
+```bash
+poetry run tox
+```
+
+We have provided a few text analysis and follow-up question examples in the file `test_data.json`.
+
+# 5. Next Steps
 
 Here are some ideas for future improvements and features:
 
 - Move prompt storage and management to the database
 - Add admin management with access to prompt management endpoints
 - Add language detection and adaptation of prompts to the detected language
-- Make the application platform-agnostic by allowing plug-and-play of different AI providers and models
+

@@ -22,16 +22,20 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
+    # volumes:
+    #   - redis_data:/data
 
   api:
     container_name: mentor_api
     build:
       context: ../
-    command: poetry run python mentor/manage.py runserver 0.0.0.0:8000
+    # command: poetry run python mentor/manage.py runserver 0.0.0.0:8000
+    command: ./entrypoint.sh
     environment:
+      PG_USERNAME: mentor
       PG_PASSWORD: mentor
+      PG_DB_NAME: mentor
+      PG_PORT: 5432
       PG_HOST: db
       REDIS_URL: redis://redis:6379/0
     ports:
@@ -56,4 +60,4 @@ services:
 
 volumes:
   db_data:
-  redis_data:
+  # redis_data:

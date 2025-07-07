@@ -1,15 +1,15 @@
 
 # 1. Mentor
 
-Mentor is a AI-powered educational assistant that allows users to analyze text and ask follow-up questions based on the analysis. It is designed to help users gain insights from their text content and engage in meaningful conversations with an AI assistant.
+Mentor is an AI-powered educational assistant that allows users to analyze text and ask follow-up questions based on the analysis. It is designed to help users gain insights from their text content and engage in meaningful conversations with an AI assistant.
 
 ## 1.1. AI Assistant
 
-The AI Assistant is the core component of the Mentor application. We use the Together AI platform as our cloud provider for AI models. Together AI offers a range of free large language models, which facilitates low-cost development of AI-powered applications without the need for local model deployment.
+The AI Assistant is the core component of the Mentor application. We use the Together AI platform as our cloud provider for AI models. Together AI offers a range of free large language models, which facilitate low-cost development of AI-powered applications without the need for local model deployment.
 
-We decided to use the model `Llama-3.3-70B-Instruct-Turbo-Free` for being among the most powerful free models available on Together AI. It is capable of handling reasonably complex conversations, as well as maintaining contextual understanding across multiple interactions.
+We decided to use the model `Llama-3.3-70B-Instruct-Turbo-Free` because it is among the most powerful free models available on Together AI. It is capable of handling reasonably complex conversations, as well as maintaining contextual understanding across multiple interactions.
 
-However, if desired, the user/developer can change the assistant underlying model and model provider platform by extending the `Assistant` class and updating the model-related environment variables (see `deploy/.env.example` for details). The Mentor application is designed to be flexible and can be adapted to use other models or providers in the future. The AI Assistant is implemented as an abstract class, allowing for easy extension and customization.
+However, if desired, the user/developer can change the assistant's underlying model and model provider platform by extending the `Assistant` class and updating the model-related environment variables (see `deploy/.env.example` for details). The Mentor application is designed to be flexible and can be adapted to use other models or providers in the future. The AI Assistant is implemented as an abstract class, allowing for easy extension and customization.
 
 To implement a new AI Assistant, you can create a subclass of the `mentor.assistant.agent.Assistant` class and implement the `model` property to return the specific model instance you want to use. This allows for plug-and-play functionality, enabling the application to switch between different AI models or providers as needed.
 
@@ -23,7 +23,7 @@ For convenience, the `agent` module already provides `Assistant` interfaces for 
 - **Redis** for caching
 - **Together AI** for AI-powered text analysis
 - **LangChain** for language model interactions
-- **DRF Spectacular** for API documentation and swagger UI
+- **DRF Spectacular** for API documentation and Swagger UI
 - **Docker Compose** for container orchestration
 - **Poetry** for dependency management
 - **MyPy** for static type checking
@@ -48,14 +48,15 @@ For convenience, the `agent` module already provides `Assistant` interfaces for 
 
 1. Create a file `deploy/.env` and add a variable `API_KEY` containing your Together AI API key. Alternatively, you can export the variable in your terminal session. Most environment variables have default values, but you can override them in the `.env` file or by exporting them in your terminal session. The `deploy/.env.example` file contains all the available environment variables and their default values.
 
-1. Run docker compose:
+1. Run Docker Compose:
    ```bash
    cd deploy
    docker compose up -d
    ```
-   If you are running it for the first time, it might take some time to initialize the database after all containers are up and running. You can check the logs of the `mentor_api` container to see when the database is ready and the api is up and running.
 
-Once the composer is up and running, you can access the API throught the swagger UI at http://127.0.0.1:8000/api/schema/swagger-ui/#/. The API documentation will be available at http://127.0.0.1:8000/api/schema/redoc/.
+If you are running it for the first time, it might take some time to initialize the database after all containers are up and running. You can check the logs of the `mentor_api` container to see when the database is ready and the api is up and running.
+
+Once the composer is up and running, you can access the API through the Swagger UI at http://127.0.0.1:8000/api/schema/swagger-ui/#/. The API documentation will be available at http://127.0.0.1:8000/api/schema/redoc/.
 
 ## 3.3. Usage
 
@@ -65,13 +66,13 @@ You will need to create a user to access the API. You can do this by sending a P
 
 Once you have registered a user, you can retrieve a JWT token by sending a POST request to the `/api/token/` endpoint with your username and password. This will return two tokens, `access` and `refresh`, which you can use to authenticate your requests. You can set the `access` token in the "Authorize" button on the top right corner. Once you have logged in, you can start using the API to create text analyses and send follow-up questions.
 
-Follow up questions are always linked to a specific text analysis, consequently all conversations start with a text analysis request. You can request a text analysis by sending a POST request to the `/api/analysis/` endpoint. The title is optional and, if not provided, one will be generated automatically by the language model based on the text content.
+Follow-up questions are always linked to a specific text analysis, consequently, all conversations start with a text analysis request. You can request a text analysis by sending a POST request to the `/api/analysis/` endpoint. The title is optional and, if not provided, one will be generated automatically by the language model based on the text content.
 
-This request will return a `task_id` that you can use to check the status of background task created to process the text analysis. You can check the status of the text analysis by sending a GET request to the `/api/task/{task_id}/` endpoint. The response will contain the status of the task and, once completed, the generated analysis.
+This request will return a `task_id` that you can use to check the status of the background task created to process the text analysis. You can check the status of the text analysis by sending a GET request to the `/api/task/{task_id}/` endpoint. The response will contain the status of the task and, once completed, the generated analysis.
 
 It will also return a `session_id` that you can use to send follow-up questions and query the details of that session. You can send a follow-up question by sending a POST request to the `/api/question/` endpoint with the corresponding session ID. The question will be processed based on the context of the previous messages exchanged in the same session ID.
 
-Like the analysis requestion, this question request will also return a `task_id` that you can use to check the status of the background task created to process the question. You can check the status of the question by sending a GET request to the `/api/task/{task_id}/` endpoint. The response will contain the status of the task and, once completed, the generated answer.
+Like the analysis request, this question request will also return a `task_id` that you can use to check the status of the background task created to process the question. You can check the status of the question by sending a GET request to the `/api/task/{task_id}/` endpoint. The response will contain the status of the task and, once completed, the generated answer.
 
 You can list all the initiated text analysis conversations by sending a GET request to the `/api/analysis/` endpoint. This will return a list of all sessions, including their IDs, titles, and creation dates. You can retrieve the details of a specific session by sending a GET request to the `/api/analysis/{session_id}/` endpoint. This will return all messages exchanged in that session, including the initial text analysis and any follow-up questions and answers.
 
@@ -88,7 +89,7 @@ To set up your development environment, run the following in the repository root
 poetry install
 ```
 
-To test the project, you can run it either with Docker Compose or locally with Poetry. To run it locally, first run docker compose with just the PostgreSQL and Redis services:
+To test the project, you can run it either with Docker Compose or locally with Poetry. To run it locally, first run Docker Compose with just the PostgreSQL and Redis services:
 ```bash
 docker compose up -d db redis
 ```

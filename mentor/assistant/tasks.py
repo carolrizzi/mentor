@@ -3,9 +3,7 @@ from uuid import UUID
 from celery.result import AsyncResult
 from django.contrib.auth.models import User
 
-from mentor.assistant.agent import analyze_text as agent_analyze_text
-from mentor.assistant.agent import follow_up_question as agent_follow_up_question
-from mentor.assistant.agent import generate_title
+from mentor.assistant.agent import get_agent
 from mentor.assistant.models import ChatSession
 from mentor.core.celery import app
 
@@ -17,9 +15,9 @@ def analyze_text(
     """
     Generate a title for the text if not provided, then analyze the text.
     """
-
+    agent = get_agent()
     if not title:
-        response = generate_title(text)
+        response = agent.generate_title(text)
         if not response:
             return None
         final_title = response.content
@@ -37,7 +35,7 @@ def analyze_text(
         title=final_title,
     )
 
-    response = agent_analyze_text(session_id=session_id, text=text)
+    response = agent.analyze_text(session_id=session_id, text=text)
     return response.content if response else None
 
 
@@ -45,7 +43,7 @@ def get_task_status(task_id):
     res = AsyncResult(task_id)
     return {
         "task_id": task_id,
-        "status": res.status,  # e.g. PENDING, STARTED, SUCCESS, FAILURE
+        "status": res.status,
         "result": res.result if res.successful() else None,
         "error": str(res.result) if res.failed() else None,
     }
@@ -56,5 +54,5 @@ def follow_up_question(session_id: UUID, question: str):
     """
     Ask a follow-up question based on the session history.
     """
-    response = agent_follow_up_question(session_id=session_id, question=question)
+    response = get_agent().follow_up_question(session_id=session_id, question=question)
     return response.content if response else None

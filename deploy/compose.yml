@@ -8,9 +8,9 @@ services:
     image: postgres:latest
     restart: always
     environment:
-      POSTGRES_USER: mentor
-      POSTGRES_PASSWORD: mentor
-      POSTGRES_DB: mentor
+      POSTGRES_USER: ${POSTGRES_USER:-mentor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mentor}
+      POSTGRES_DB: ${POSTGRES_DB:-mentor}
     ports:
       - "5432:5432"
     volumes:
@@ -22,20 +22,17 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    # volumes:
-    #   - redis_data:/data
 
   api:
     container_name: mentor_api
     build:
       context: ../
-    # command: poetry run python mentor/manage.py runserver 0.0.0.0:8000
     command: ./entrypoint.sh
     environment:
-      PG_USERNAME: mentor
-      PG_PASSWORD: mentor
-      PG_DB_NAME: mentor
-      PG_PORT: 5432
+      PG_USERNAME: ${PG_USERNAME:-mentor}
+      PG_PASSWORD: ${PG_PASSWORD:-mentor}
+      PG_DB_NAME: ${PG_DB_NAME:-mentor}
+      PG_PORT: ${PG_PORT:-5432}
       PG_HOST: db
       REDIS_URL: redis://redis:6379/0
     ports:
@@ -50,14 +47,13 @@ services:
       context: ../
     command: poetry run celery -A mentor.core worker --loglevel=info
     environment:
-      PG_PASSWORD: mentor
+      PG_PASSWORD: ${PG_PASSWORD:-mentor}
       PG_HOST: db
       REDIS_URL: redis://redis:6379/0
-      TOGETHER_API_KEY: ${TOGETHER_API_KEY}
+      TOGETHER_API_KEY: ${API_KEY?Please set the API_KEY environment variable}
     depends_on:
       - redis
       - api
 
 volumes:
   db_data:
-  # redis_data:

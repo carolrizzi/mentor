@@ -10,16 +10,30 @@ from mentor.assistant import tasks
 pytestmark = pytest.mark.django_db
 
 
-def test_analyze_text_with_provided_title(mocker):
+@pytest.fixture
+def fake_agent(mocker):
+    """
+    Fixture that returns a fake Assistant instance
+    with all its methods mocked.
+    """
+    agent_mock = mocker.Mock()
+    agent_mock.generate_title.return_value = mocker.Mock(content="Generated Title")
+    agent_mock.analyze_text.return_value = mocker.Mock(content="Analysis Result")
+    agent_mock.follow_up_question.return_value = mocker.Mock(
+        content="The follow-up answer"
+    )
+    return agent_mock
+
+
+def test_analyze_text_with_provided_title(mocker, fake_agent):
     mock_user = User.objects.create_user(username="tester", password="pw")
-    mock_analyze = mocker.patch("mentor.assistant.tasks.agent_analyze_text")
+
+    mock_get_agent = mocker.patch(
+        "mentor.assistant.tasks.get_agent", return_value=fake_agent
+    )
     mock_create_session = mocker.patch(
         "mentor.assistant.tasks.ChatSession.objects.create"
     )
-
-    mock_response = mocker.Mock()
-    mock_response.content = "Analysis result here"
-    mock_analyze.return_value = mock_response
 
     session_id = uuid.uuid4()
     text = "Some educational text"
@@ -32,30 +46,26 @@ def test_analyze_text_with_provided_title(mocker):
         title=title,
     )
 
+    mock_get_agent.assert_called_once()
     mock_create_session.assert_called_once_with(
         id=session_id,
         user=mock_user,
         title=title,
     )
-    mock_analyze.assert_called_once_with(session_id=session_id, text=text)
-    assert result == "Analysis result here"
+    fake_agent.analyze_text.assert_called_once_with(session_id=session_id, text=text)
+    assert result == "Analysis Result"
 
 
-def test_analyze_text_without_title_generates_title(mocker):
+def test_analyze_text_without_title_generates_title(mocker, fake_agent):
     mock_user = User.objects.create_user(username="tester", password="pw")
-    mock_generate_title = mocker.patch("mentor.assistant.tasks.generate_title")
-    mock_analyze = mocker.patch("mentor.assistant.tasks.agent_analyze_text")
+
+    fake_agent.generate_title.return_value = mocker.Mock(content="Generated Title")
+    fake_agent.analyze_text.return_value = mocker.Mock(content="Analysis Result")
+
+    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
     mock_create_session = mocker.patch(
         "mentor.assistant.tasks.ChatSession.objects.create"
     )
-
-    mock_title_response = mocker.Mock()
-    mock_title_response.content = "Generated Title"
-    mock_generate_title.return_value = mock_title_response
-
-    mock_analysis_response = mocker.Mock()
-    mock_analysis_response.content = "Analysis Result"
-    mock_analyze.return_value = mock_analysis_response
 
     session_id = uuid.uuid4()
     text = "Some educational text"
@@ -67,19 +77,19 @@ def test_analyze_text_without_title_generates_title(mocker):
         title=None,
     )
 
-    mock_generate_title.assert_called_once_with(text)
+    fake_agent.generate_title.assert_called_once_with(text)
     mock_create_session.assert_called_once_with(
         id=session_id,
         user=mock_user,
         title="Generated Title",
     )
-    mock_analyze.assert_called_once_with(session_id=session_id, text=text)
+    fake_agent.analyze_text.assert_called_once_with(session_id=session_id, text=text)
     assert result == "Analysis Result"
 
 
-def test_analyze_text_returns_none_if_title_generation_fails(mocker):
-    mock_generate_title = mocker.patch("mentor.assistant.tasks.generate_title")
-    mock_generate_title.return_value = None
+def test_analyze_text_returns_none_if_title_generation_fails(mocker, fake_agent):
+    fake_agent.generate_title.return_value = None
+    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
 
     result = tasks.analyze_text.run(
         user_id=123,
@@ -91,9 +101,11 @@ def test_analyze_text_returns_none_if_title_generation_fails(mocker):
     assert result is None
 
 
-def test_analyze_text_returns_none_if_user_does_not_exist(mocker):
+def test_analyze_text_returns_none_if_user_does_not_exist(mocker, fake_agent):
     mock_user_get = mocker.patch("mentor.assistant.tasks.User.objects.get")
     mock_user_get.side_effect = User.DoesNotExist
+
+    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
 
     result = tasks.analyze_text.run(
         user_id=999,
@@ -105,11 +117,8 @@ def test_analyze_text_returns_none_if_user_does_not_exist(mocker):
     assert result is None
 
 
-def test_follow_up_question_returns_content(mocker):
-    mock_follow_up = mocker.patch("mentor.assistant.tasks.agent_follow_up_question")
-    mock_response = mocker.Mock()
-    mock_response.content = "The follow-up answer"
-    mock_follow_up.return_value = mock_response
+def test_follow_up_question_returns_content(mocker, fake_agent):
+    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
 
     session_id = uuid.uuid4()
     question = "What is photosynthesis?"
@@ -119,13 +128,17 @@ def test_follow_up_question_returns_content(mocker):
         question=question,
     )
 
-    mock_follow_up.assert_called_once_with(session_id=session_id, question=question)
+    fake_agent.follow_up_question.assert_called_once_with(
+        session_id=session_id,
+        question=question,
+    )
     assert result == "The follow-up answer"
 
 
-def test_follow_up_question_returns_none_if_response_is_none(mocker):
-    mock_follow_up = mocker.patch("mentor.assistant.tasks.agent_follow_up_question")
-    mock_follow_up.return_value = None
+def test_follow_up_question_returns_none_if_response_is_none(mocker, fake_agent):
+    fake_agent.follow_up_question.return_value = None
+
+    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
 
     session_id = uuid.uuid4()
     question = "Another question"

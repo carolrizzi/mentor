@@ -29,8 +29,8 @@ We decided to use the model `Llama-3.3-70B-Instruct-Turbo-Free` for being among 
 
 ## Requirements
 
-3. Docker Compose
-4. A [Together AI](https://www.together.ai/) account
+1. Docker Compose
+1. A [Together AI](https://www.together.ai/) account
 
 ## Installation
 
@@ -40,9 +40,9 @@ We decided to use the model `Llama-3.3-70B-Instruct-Turbo-Free` for being among 
    cd mentor
    ```
 
-2. Create a file `deploy/.env` and add a variable `TOGETHER_API_KEY` containing your Together AI API key. Alternatively, you can export the variable in your terminal session.
+1. Create a file `deploy/.env` and add a variable `API_KEY` containing your Together AI API key. Alternatively, you can export the variable in your terminal session.
 
-3. Run docker compose:
+1. Run docker compose:
    ```bash
    cd deploy
    docker compose up -d
@@ -90,6 +90,8 @@ To test the project, you can run it either with Docker Compose or locally with P
 ```bash
 docker compose up -d db redis
 ```
+
+To run the Django server locally, you will need to copy your `deploy/.env` file to the root of the project and ensure it contains the `API_KEY` variable with your Together AI API key. 
 
 Then, you can run the Django development server with:
 ```bash

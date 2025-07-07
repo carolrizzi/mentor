@@ -17,6 +17,16 @@ def fake_model(mocker):
     return mock_model
 
 
+@pytest.fixture
+def fake_assistant(fake_model, mocker):
+    class FakeAssistant(agent.Assistant):
+        @property
+        def model(self):
+            return fake_model
+
+    return FakeAssistant()
+
+
 def test_get_prompt_reads_file(mocker):
     mock_read = mocker.patch("mentor.assistant.agent.read_text_file")
     mock_read.return_value = "Fake prompt text"
@@ -27,9 +37,7 @@ def test_get_prompt_reads_file(mocker):
     assert result == "Fake prompt text"
 
 
-def test_generate_title(fake_model, mocker):
-    mocker.patch("mentor.assistant.agent.get_model", return_value=fake_model)
-
+def test_generate_title(fake_assistant, mocker):
     mocker.patch(
         "mentor.assistant.agent.get_prompt",
         side_effect=[
@@ -38,10 +46,10 @@ def test_generate_title(fake_model, mocker):
         ],
     )
 
-    result = agent.generate_title("some text")
+    result = fake_assistant.generate_title("some text")
 
-    fake_model.invoke.assert_called_once()
-    messages = fake_model.invoke.call_args[0][0]
+    fake_assistant.model.invoke.assert_called_once()
+    messages = fake_assistant.model.invoke.call_args[0][0]
     assert isinstance(messages, list)
     assert messages[0][0] == "system"
     assert messages[1][0] == "human"
@@ -73,26 +81,25 @@ def test_chain_with_history_invoke(mocker):
     assert result.content == "Chain Result"
 
 
-def test_analyze_text_calls_chain_invoke(mocker):
+def test_analyze_text_calls_chain_invoke(fake_assistant, mocker):
     fake_chain = mocker.Mock()
     fake_chain.invoke.return_value = mocker.Mock(content="Analysis Result")
 
     mocker.patch(
         "mentor.assistant.agent.get_chain_with_history", return_value=fake_chain
     )
-
     mocker.patch("mentor.assistant.agent.get_prompt", return_value="Human prompt ")
 
     session_id = uuid.uuid4()
     text = "This is my text"
 
-    result = agent.analyze_text(session_id=session_id, text=text)
+    result = fake_assistant.analyze_text(session_id=session_id, text=text)
 
     fake_chain.invoke.assert_called_once()
     assert result.content == "Analysis Result"
 
 
-def test_follow_up_question_calls_chain_invoke(mocker):
+def test_follow_up_question_calls_chain_invoke(fake_assistant, mocker):
     fake_chain = mocker.Mock()
     fake_chain.invoke.return_value = mocker.Mock(content="Follow-up result")
 
@@ -103,7 +110,7 @@ def test_follow_up_question_calls_chain_invoke(mocker):
     session_id = uuid.uuid4()
     question = "My follow-up question"
 
-    result = agent.follow_up_question(session_id=session_id, question=question)
+    result = fake_assistant.follow_up_question(session_id=session_id, question=question)
 
     fake_chain.invoke.assert_called_once()
     assert result.content == "Follow-up result"

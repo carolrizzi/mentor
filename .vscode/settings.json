@@ -5,7 +5,7 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.envFile": "${workspaceFolder}/mentor/.env",
+    "python.envFile": "${workspaceFolder}/mentor/deploy/.env",
     "mypy.configFile": "./config/mypy.ini",
     "ruff.configuration": "${workspaceFolder}/config/ruff.toml",
     "[python]": {

@@ -9,7 +9,7 @@ The AI Assistant is the core component of the Mentor application. We use the Tog
 
 We decided to use the model `Llama-3.3-70B-Instruct-Turbo-Free` for being among the most powerful free models available on Together AI. It is capable of handling reasonably complex conversations, as well as maintaining contextual understanding across multiple interactions.
 
-However, if desired, the user/developer can change the assistant underlying model and model provider platform by extending the `Assistant` class and updating the model-related environment variables (see `.env.example` for details). The Mentor application is designed to be flexible and can be adapted to use other models or providers in the future. The AI Assistant is implemented as an abstract class, allowing for easy extension and customization.
+However, if desired, the user/developer can change the assistant underlying model and model provider platform by extending the `Assistant` class and updating the model-related environment variables (see `deploy/.env.example` for details). The Mentor application is designed to be flexible and can be adapted to use other models or providers in the future. The AI Assistant is implemented as an abstract class, allowing for easy extension and customization.
 
 To implement a new AI Assistant, you can create a subclass of the `mentor.assistant.agent.Assistant` class and implement the `model` property to return the specific model instance you want to use. This allows for plug-and-play functionality, enabling the application to switch between different AI models or providers as needed.
 
@@ -46,7 +46,7 @@ For convenience, the `agent` module already provides `Assistant` interfaces for 
    cd mentor
    ```
 
-1. Create a file `deploy/.env` and add a variable `API_KEY` containing your Together AI API key. Alternatively, you can export the variable in your terminal session. Most environment variables have default values, but you can override them in the `.env` file or by exporting them in your terminal session. The `.env.example` file contains all the available environment variables and their default values.
+1. Create a file `deploy/.env` and add a variable `API_KEY` containing your Together AI API key. Alternatively, you can export the variable in your terminal session. Most environment variables have default values, but you can override them in the `.env` file or by exporting them in your terminal session. The `deploy/.env.example` file contains all the available environment variables and their default values.
 
 1. Run docker compose:
    ```bash
@@ -63,7 +63,7 @@ With the project running, open the [Swagger UI](http://127.0.0.1:8000/api/schema
 
 You will need to create a user to access the API. You can do this by sending a POST request to the `/api/register/` endpoint. The email field is optional and is not effectively used in this project.
 
-This will return a JWT token that you can use to authenticate your requests. You can set the access token in the "Authorize" button on the top right corner. Once you have logged in, you can start using the API to create text analyses and send follow-up questions.
+Once you have registered a user, you can retrieve a JWT token by sending a POST request to the `/api/token/` endpoint with your username and password. This will return two tokens, `access` and `refresh`, which you can use to authenticate your requests. You can set the `access` token in the "Authorize" button on the top right corner. Once you have logged in, you can start using the API to create text analyses and send follow-up questions.
 
 Follow up questions are always linked to a specific text analysis, consequently all conversations start with a text analysis request. You can request a text analysis by sending a POST request to the `/api/analysis/` endpoint. The title is optional and, if not provided, one will be generated automatically by the language model based on the text content.
 
@@ -93,7 +93,7 @@ To test the project, you can run it either with Docker Compose or locally with P
 docker compose up -d db redis
 ```
 
-To run the Django server locally, you will need to copy your `deploy/.env` file to the root of the project and ensure it contains the `API_KEY` variable with your Together AI API key. 
+To run the Django server locally, you will need to copy your `deploy/.env` file to the root of the project and ensure it contains the `API_KEY` and `PG_PASSWORD` variables. 
 
 Then, you can run the Django development server with:
 ```bash

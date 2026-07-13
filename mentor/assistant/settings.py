@@ -44,7 +44,8 @@ class AzureOpenAiModelSettings(ModelSettings):
     # any other configs that are specific to Azure OpenAI
 
 
-class OpenAiModelSettings(ModelSettings): ...
+class OpenAiModelSettings(ModelSettings):
+    model: str = "gpt-4o-mini"
 
 
 class AwsBedrockModelSettings(ModelSettings):

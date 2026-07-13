@@ -52,6 +52,7 @@ services:
       PG_HOST: db
       REDIS_URL: redis://redis:6379/0
       API_KEY: ${API_KEY?Please set the API_KEY environment variable}
+      AI_PLATFORM: ${AI_PLATFORM:-together.ai}
     depends_on:
       - redis
       - api

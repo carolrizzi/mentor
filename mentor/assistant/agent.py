@@ -8,6 +8,7 @@ from django.conf import settings
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_openai import ChatOpenAI
 from langchain_postgres import PostgresChatMessageHistory
 from langchain_together import ChatTogether
 from psycopg_pool import ConnectionPool
@@ -15,6 +16,7 @@ from psycopg_pool import ConnectionPool
 from mentor.assistant.models import ChatMessage
 from mentor.assistant.settings import (
     AiPlatform,
+    OpenAiModelSettings,
     PostgreSettings,
     Settings,
     TogetherAiModelSettings,
@@ -173,9 +175,13 @@ class OpenAiAssistant(Assistant):
     @cached_property
     def model(
         self,
-    ) -> BaseChatModel:  # should return langchain_openai.chat_models.base.ChatOpenAI
-        # settings = mentor.assistant.settings.OpenAiModelSettings()
-        raise NotImplementedError("OpenAI Assistant is not implemented yet.")
+    ) -> ChatOpenAI:
+        settings = OpenAiModelSettings()
+        return ChatOpenAI(
+            model=settings.model,
+            temperature=settings.temperature,
+            api_key=settings.api_key.get_secret_value(),
+        )
 
 
 class AzureOpenAiAssistant(Assistant):

@@ -1,11 +1,10 @@
 name: mentor
 
-version: '3.9'
 
 services:
   db:
     container_name: mentor_db
-    image: postgres:latest
+    image: postgres:17
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-mentor}

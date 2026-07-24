@@ -26,6 +26,9 @@ class ChatSession(models.Model):
         blank=True,
         help_text="Title of the text analysed, also used as a title for the session.",
     )
+    language = models.CharField(
+        max_length=2, blank=True, help_text="Language of the session.", default="pt"
+    )
 
     def __str__(self):
         return f"{self.title} (User: {self.user.username})"

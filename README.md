@@ -5,15 +5,13 @@ Mentor is an AI-powered educational assistant that allows users to analyze text 
 
 ## 1.1. AI Assistant
 
-The AI Assistant is the core component of the Mentor application. We use the Together AI platform as our cloud provider for AI models. Together AI offers a range of free large language models, which facilitate low-cost development of AI-powered applications without the need for local model deployment.
-
-We decided to use the model `Llama-3.3-70B-Instruct-Turbo-Free` because it is among the most powerful free models available on Together AI. It is capable of handling reasonably complex conversations, as well as maintaining contextual understanding across multiple interactions.
+The AI Assistant is the core component of the Mentor application. We currently have two options of cloud provider implemented for the assistant: OpenAI and Together AI.
 
 However, if desired, the user/developer can change the assistant's underlying model and model provider platform by extending the `Assistant` class and updating the model-related environment variables (see `deploy/.env.example` for details). The Mentor application is designed to be flexible and can be adapted to use other models or providers in the future. The AI Assistant is implemented as an abstract class, allowing for easy extension and customization.
 
 To implement a new AI Assistant, you can create a subclass of the `mentor.assistant.agent.Assistant` class and implement the `model` property to return the specific model instance you want to use. This allows for plug-and-play functionality, enabling the application to switch between different AI models or providers as needed.
 
-For convenience, the `agent` module already provides `Assistant` interfaces for OpenAI, Azure OpenAI, and AWS Bedrock, which can be implemented in the future if desired. The current implementation uses the Together AI platform, but the architecture is designed to be flexible enough to accommodate other providers.
+For convenience, the `agent` module already provides `Assistant` interfaces for Azure OpenAI and AWS Bedrock, which can be implemented in the future if desired. The current implementation uses the OpenAI or Together AI platforms, but the architecture is designed to be flexible enough to accommodate other providers.
 
 # 2. Tech Stack
 
@@ -36,7 +34,7 @@ For convenience, the `agent` module already provides `Assistant` interfaces for 
 ## 3.1. Requirements
 
 1. Docker Compose
-1. A [Together AI](https://www.together.ai/) account
+1. Depending on the cloud provider you use, you may need a [Together AI](https://www.together.ai/) or [OpenAI](https://platform.openai.com/) account.
 
 ## 3.2. Installation and Execution
 
@@ -46,7 +44,7 @@ For convenience, the `agent` module already provides `Assistant` interfaces for 
    cd mentor
    ```
 
-1. Create a file `deploy/.env` and add a variable `API_KEY` containing your Together AI API key. Alternatively, you can export the variable in your terminal session. Most environment variables have default values, but you can override them in the `.env` file or by exporting them in your terminal session. The `deploy/.env.example` file contains all the available environment variables and their default values.
+1. Create a file `deploy/.env` and add a variable `API_KEY` containing the API key of your provider. Alternatively, you can export the variable in your terminal session. Most environment variables have default values, but you can override them in the `.env` file or by exporting them in your terminal session. The `deploy/.env.example` file contains all the available environment variables and their default values.
 
 1. Run Docker Compose:
    ```bash

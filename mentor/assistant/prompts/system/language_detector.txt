@@ -1,0 +1,3 @@
+Detect the language of the following text and return ONLY the ISO 639-1 code (e.g., "en" for English, "pt" for Portuguese, "es" for Spanish, "fr" for French, etc.).
+
+TEXT:

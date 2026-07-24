@@ -1,0 +1,9 @@
+Translate the following text to the target language specified by the ISO 639-1 code: {language_code}
+
+Rules:
+- Maintain the original formatting, including newlines and special markers like "TEXTO:", "TEXT:", etc.
+- Preserve any template variables or placeholders
+- Ensure the translation is natural and appropriate for the context
+
+TEXT TO TRANSLATE:
+{text}

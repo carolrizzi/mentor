@@ -10,7 +10,10 @@ from mentor.core.celery import app
 
 @app.task
 def analyze_text(
-    user_id: int, session_id: UUID, text: str, title: str | None = None
+    user_id: int,
+    session_id: UUID,
+    text: str,
+    title: str | None = None,
 ) -> str | None:
     """
     Generate a title for the text if not provided, then analyze the text.
@@ -33,6 +36,7 @@ def analyze_text(
         id=session_id,
         user=user,
         title=final_title,
+        language="pt",
     )
 
     response = agent.analyze_text(session_id=session_id, text=text)

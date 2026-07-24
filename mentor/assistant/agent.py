@@ -34,11 +34,15 @@ class PromptName(StrEnum):
     GENERATE_TITLE = "generate_title"
 
 
-def get_prompt_file_path(prompt_name: PromptName, prompt_type: PromptType) -> Path:
+def get_prompt_file_path(
+    prompt_name: PromptName, prompt_type: PromptType, language: str
+) -> Path:
     return (
         settings.BASE_DIR
         / "assistant"
         / "prompts"
+        / "assistant"
+        / language
         / f"{prompt_name.value}_{prompt_type.value}.txt"
     )
 
@@ -49,9 +53,11 @@ def read_text_file(file_path: str | Path) -> str:
 
 
 @cache
-def get_prompt(prompt_name: PromptName, prompt_type: PromptType) -> str:
+def get_prompt(prompt_name: PromptName, prompt_type: PromptType, language: str) -> str:
     return read_text_file(
-        get_prompt_file_path(prompt_name=prompt_name, prompt_type=prompt_type)
+        get_prompt_file_path(
+            prompt_name=prompt_name, prompt_type=prompt_type, language=language
+        )
     )
 
 
@@ -75,8 +81,8 @@ def get_session_history(session_id):
         )
 
 
-def get_prompt_template(prompt_name: PromptName) -> ChatPromptTemplate:
-    system_prompt = get_prompt(prompt_name, PromptType.SYSTEM)
+def get_prompt_template(prompt_name: PromptName, language: str) -> ChatPromptTemplate:
+    system_prompt = get_prompt(prompt_name, PromptType.SYSTEM, language=language)
     return ChatPromptTemplate.from_messages(
         [
             ("system", system_prompt),
@@ -86,8 +92,10 @@ def get_prompt_template(prompt_name: PromptName) -> ChatPromptTemplate:
     )
 
 
-def get_chain_with_history(prompt_name: PromptName, model: BaseChatModel):
-    prompt = get_prompt_template(prompt_name)
+def get_chain_with_history(
+    prompt_name: PromptName, model: BaseChatModel, language: str
+):
+    prompt = get_prompt_template(prompt_name=prompt_name, language=language)
     chain = prompt | model
     return RunnableWithMessageHistory(
         chain,
@@ -112,6 +120,9 @@ class Assistant(ABC):
     It provides methods to analyze text, ask follow-up questions, and generate titles.
     """
 
+    def __init__(self, language: str = "pt"):
+        self.language = language
+
     @property
     @abstractmethod
     def model(self) -> BaseChatModel:
@@ -123,24 +134,38 @@ class Assistant(ABC):
 
     def analyze_text(self, session_id: UUID, text: str):
         chain_with_history = get_chain_with_history(
-            prompt_name=PromptName.TEXT_ANALYSIS, model=self.model
+            prompt_name=PromptName.TEXT_ANALYSIS,
+            model=self.model,
+            language=self.language,
         )
-        question = get_prompt(PromptName.TEXT_ANALYSIS, PromptType.HUMAN)
+        question = get_prompt(
+            PromptName.TEXT_ANALYSIS, PromptType.HUMAN, language=self.language
+        )
         return chain_with_history_invoke(
             chain=chain_with_history, session_id=session_id, question=question + text
         )
 
     def follow_up_question(self, session_id: UUID, question: str):
         chain_with_history = get_chain_with_history(
-            prompt_name=PromptName.FOLLOW_UP_QUESTIONS, model=self.model
+            prompt_name=PromptName.FOLLOW_UP_QUESTIONS,
+            model=self.model,
+            language=self.language,
         )
         return chain_with_history_invoke(
             chain=chain_with_history, session_id=session_id, question=question
         )
 
     def generate_title(self, text: str):
-        system_prompt = get_prompt(PromptName.GENERATE_TITLE, PromptType.SYSTEM)
-        human_prompt = get_prompt(PromptName.GENERATE_TITLE, PromptType.HUMAN)
+        system_prompt = get_prompt(
+            prompt_name=PromptName.GENERATE_TITLE,
+            prompt_type=PromptType.SYSTEM,
+            language=self.language,
+        )
+        human_prompt = get_prompt(
+            prompt_name=PromptName.GENERATE_TITLE,
+            prompt_type=PromptType.HUMAN,
+            language=self.language,
+        )
         human_prompt += text
 
         return self.model.invoke(

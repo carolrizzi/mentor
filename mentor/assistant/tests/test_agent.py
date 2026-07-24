@@ -31,7 +31,9 @@ def test_get_prompt_reads_file(mocker):
     mock_read = mocker.patch("mentor.assistant.agent.read_text_file")
     mock_read.return_value = "Fake prompt text"
 
-    result = agent.get_prompt(agent.PromptName.TEXT_ANALYSIS, agent.PromptType.SYSTEM)
+    result = agent.get_prompt(
+        agent.PromptName.TEXT_ANALYSIS, agent.PromptType.SYSTEM, language="pt"
+    )
 
     mock_read.assert_called_once()
     assert result == "Fake prompt text"

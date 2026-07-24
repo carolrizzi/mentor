@@ -11,6 +11,7 @@ def test_chat_session_creation():
     session = ChatSession.objects.create(
         user=user,
         title="Ciclos Biogeoquímicos",
+        language="pt",
     )
 
     assert session.user == user
@@ -23,6 +24,7 @@ def test_chat_message_creation():
     session = ChatSession.objects.create(
         user=user,
         title="Independência do Brasil",
+        language="pt",
     )
     message_content = {
         "type": "ai",
@@ -40,7 +42,11 @@ def test_chat_message_creation():
 
 def test_cascade_delete_chat_session_deletes_messages():
     user = User.objects.create_user(username="testuser", password="secret")
-    session = ChatSession.objects.create(user=user, title="Teste")
+    session = ChatSession.objects.create(
+        user=user,
+        title="Teste",
+        language="pt",
+    )
     ChatMessage.objects.create(
         session=session,
         message={"type": "human", "content": "Olá!"},
@@ -57,5 +63,6 @@ def test_blank_title_allowed():
     session = ChatSession.objects.create(
         user=user,
         title="",
+        language="pt",
     )
     assert session.title == ""

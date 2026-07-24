@@ -51,6 +51,7 @@ def test_analyze_text_with_provided_title(mocker, fake_agent):
         id=session_id,
         user=mock_user,
         title=title,
+        language="pt",
     )
     fake_agent.analyze_text.assert_called_once_with(session_id=session_id, text=text)
     assert result == "Analysis Result"
@@ -82,6 +83,7 @@ def test_analyze_text_without_title_generates_title(mocker, fake_agent):
         id=session_id,
         user=mock_user,
         title="Generated Title",
+        language="pt",
     )
     fake_agent.analyze_text.assert_called_once_with(session_id=session_id, text=text)
     assert result == "Analysis Result"

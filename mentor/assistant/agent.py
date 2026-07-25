@@ -1,12 +1,16 @@
 from abc import ABC, abstractmethod
-from enum import StrEnum
+from enum import StrEnum, auto
 from functools import cache, cached_property
 from pathlib import Path
 from uuid import UUID
 
 from django.conf import settings
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    MessagesPlaceholder,
+    PromptTemplate,
+)
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_openai import ChatOpenAI
 from langchain_postgres import PostgresChatMessageHistory
@@ -22,6 +26,8 @@ from mentor.assistant.settings import (
     TogetherAiModelSettings,
 )
 
+DEFAULT_LANGUAGE = Settings().default_language
+
 
 class PromptType(StrEnum):
     SYSTEM = "system"
@@ -32,6 +38,21 @@ class PromptName(StrEnum):
     TEXT_ANALYSIS = "text_analysis"
     FOLLOW_UP_QUESTIONS = "follow_up"
     GENERATE_TITLE = "generate_title"
+
+
+class SystemPromptName(StrEnum):
+    LANGUAGE_DETECTOR = auto()
+    PROMPT_TRANSLATOR = auto()
+
+
+def get_system_prompt_path(prompt_name: SystemPromptName) -> Path:
+    return (
+        settings.BASE_DIR
+        / "assistant"
+        / "prompts"
+        / "system"
+        / f"{prompt_name.value}.txt"
+    )
 
 
 def get_prompt_file_path(
@@ -50,6 +71,11 @@ def get_prompt_file_path(
 def read_text_file(file_path: str | Path) -> str:
     with open(file_path, encoding="utf-8") as file:
         return file.read()
+
+
+def get_system_prompt(prompt_name: SystemPromptName) -> str:
+    prompt_path = get_system_prompt_path(prompt_name)
+    return read_text_file(prompt_path)
 
 
 @cache
@@ -120,7 +146,7 @@ class Assistant(ABC):
     It provides methods to analyze text, ask follow-up questions, and generate titles.
     """
 
-    def __init__(self, language: str = "pt"):
+    def __init__(self, language: str = DEFAULT_LANGUAGE):
         self.language = language
 
     @property
@@ -194,7 +220,6 @@ class TogetherAiAssistant(Assistant):
 class OpenAiAssistant(Assistant):
     """
     AI assistant that uses OpenAI platform for text analysis.
-    This is a placeholder for future implementation.
     """
 
     @cached_property
@@ -237,7 +262,123 @@ class AwsBedrockAssistant(Assistant):
         raise NotImplementedError("AWS Bedrock Assistant is not implemented yet.")
 
 
-def get_agent() -> Assistant:
+class SystemAgent(ABC):
+    """
+    Base class for system agents.
+    """
+
+    @property
+    @abstractmethod
+    def model(self) -> BaseChatModel:
+        """
+        Returns the model used by the assistant.
+        Should be implemented by subclasses to return the specific model instance.
+        """
+        raise NotImplementedError
+
+    def detect_language(self, text: str) -> str:
+        prompt = get_system_prompt(SystemPromptName.LANGUAGE_DETECTOR)
+        prompt += text
+
+        response = self.model.invoke([("human", prompt)])
+        if response and response.content and isinstance(response.content, str):
+            detected_lang = response.content.strip().lower()
+            if len(detected_lang) != 2:
+                raise Exception(
+                    f"Model returned invalid language code {self.detect_language}."
+                )
+            return detected_lang
+        raise Exception("Model failed to detect language.")
+
+    def translate_prompt(self, prompt: str, language: str) -> str:
+        system_prompt = get_system_prompt(SystemPromptName.PROMPT_TRANSLATOR)
+        prompt_template = PromptTemplate.from_template(system_prompt)
+        formatted_prompt = prompt_template.format(language_code=language, text=prompt)
+
+        response = self.model.invoke([("human", formatted_prompt)])
+        if response and response.content and isinstance(response.content, str):
+            return response.content
+        raise Exception("Failed to translate prompt")
+
+
+class TogetherAiSystemAgent(SystemAgent):
+    """
+    System Agent that uses Together AI.
+    """
+
+    @cached_property
+    def model(self) -> ChatTogether:
+        settings = TogetherAiModelSettings()
+        return ChatTogether(
+            model=settings.model,
+            temperature=settings.temperature,
+            api_key=settings.api_key.get_secret_value(),
+        )
+
+
+class OpenAiSystemAgent(SystemAgent):
+    """
+    System Agent that uses OpenAI platform.
+    """
+
+    @cached_property
+    def model(
+        self,
+    ) -> ChatOpenAI:
+        settings = OpenAiModelSettings()
+        return ChatOpenAI(
+            model=settings.model,
+            temperature=settings.temperature,
+            api_key=settings.api_key.get_secret_value(),
+        )
+
+
+class AzureOpenAiSystemAgent(SystemAgent):
+    """
+    System Agent that uses Azure OpenAI platform for text analysis.
+    This is a placeholder for future implementation.
+    """
+
+    @cached_property
+    def model(
+        self,
+    ) -> BaseChatModel:  # return langchain_openai.chat_models.azure.AzureChatOpenAI
+        # settings = mentor.assistant.settings.AwsBedrockModelSettings()
+        raise NotImplementedError("Azure OpenAI Assistant is not implemented yet.")
+
+
+class AwsBedrockSystemAgent(SystemAgent):
+    """
+    System Agent that uses AWS Bedrock platform for text analysis.
+    This is a placeholder for future implementation.
+    """
+
+    @cached_property
+    def model(
+        self,
+    ) -> BaseChatModel:  # should return langchain_aws.chat_models.bedrock.ChatBedrock
+        # settings = mentor.assistant.settings.AzureOpenAiModelSettings()
+        raise NotImplementedError("AWS Bedrock Assistant is not implemented yet.")
+
+
+def get_system_agent() -> SystemAgent:
+    """
+    Returns an instance of system agent based on the .
+    """
+    ai_platform = Settings().ai_platform
+    match ai_platform:
+        case AiPlatform.TOGETHER_AI:
+            return TogetherAiSystemAgent()
+        case AiPlatform.OPENAI:
+            return OpenAiSystemAgent()
+        case AiPlatform.AZURE_OPENAI:
+            return AzureOpenAiSystemAgent()
+        case AiPlatform.AWS_BEDROCK:
+            return AwsBedrockSystemAgent()
+    raise ValueError(f"Unsupported AI platform: {ai_platform.value}")
+
+
+def get_assistant_agent(language: str = DEFAULT_LANGUAGE) -> Assistant:
     """
     Returns an instance of the AI assistant.
     This function can be used to get the specific implementation of the assistant.
@@ -245,11 +386,11 @@ def get_agent() -> Assistant:
     ai_platform = Settings().ai_platform
     match ai_platform:
         case AiPlatform.TOGETHER_AI:
-            return TogetherAiAssistant()
+            return TogetherAiAssistant(language)
         case AiPlatform.OPENAI:
-            return OpenAiAssistant()
+            return OpenAiAssistant(language)
         case AiPlatform.AZURE_OPENAI:
-            return AzureOpenAiAssistant()
+            return AzureOpenAiAssistant(language)
         case AiPlatform.AWS_BEDROCK:
-            return AwsBedrockAssistant()
+            return AwsBedrockAssistant(language)
     raise ValueError(f"Unsupported AI platform: {ai_platform.value}")

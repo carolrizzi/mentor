@@ -4,6 +4,7 @@ Rules:
 - Maintain the original formatting, including newlines and special markers like "TEXTO:", "TEXT:", etc.
 - Preserve any template variables or placeholders
 - Ensure the translation is natural and appropriate for the context
+- Return ONLY the translated prompt and nothing else.
 
 TEXT TO TRANSLATE:
 {text}

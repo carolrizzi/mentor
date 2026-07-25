@@ -18,6 +18,7 @@ class MentorBaseSettings(BaseSettings):
 
 
 class Settings(MentorBaseSettings):
+    default_language: str = "pt"
     access_token_lifetime_minutes: int = 30
     refresh_token_lifetime_days: int = 2
     redis_url: str = "redis://localhost:6379/0"

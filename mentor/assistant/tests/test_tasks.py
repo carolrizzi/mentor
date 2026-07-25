@@ -11,6 +11,20 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
+def fake_system_agent(mocker):
+    """
+    Fixture that returns a fake Assistant instance
+    with all its methods mocked.
+    """
+    agent_mock = mocker.Mock()
+    agent_mock.detect_language.return_value = mocker.Mock(content="pt")
+    agent_mock.translate_prompt.return_value = mocker.Mock(
+        content="Mocked translated prompt"
+    )
+    return agent_mock
+
+
+@pytest.fixture
 def fake_agent(mocker):
     """
     Fixture that returns a fake Assistant instance
@@ -25,11 +39,14 @@ def fake_agent(mocker):
     return agent_mock
 
 
-def test_analyze_text_with_provided_title(mocker, fake_agent):
+def test_analyze_text_with_provided_title(mocker, fake_agent, fake_system_agent):
     mock_user = User.objects.create_user(username="tester", password="pw")
 
+    mocker.patch(
+        "mentor.assistant.tasks.get_system_agent", return_value=fake_system_agent
+    )
     mock_get_agent = mocker.patch(
-        "mentor.assistant.tasks.get_agent", return_value=fake_agent
+        "mentor.assistant.tasks.get_assistant_agent", return_value=fake_agent
     )
     mock_create_session = mocker.patch(
         "mentor.assistant.tasks.ChatSession.objects.create"
@@ -57,13 +74,18 @@ def test_analyze_text_with_provided_title(mocker, fake_agent):
     assert result == "Analysis Result"
 
 
-def test_analyze_text_without_title_generates_title(mocker, fake_agent):
+def test_analyze_text_without_title_generates_title(
+    mocker, fake_agent, fake_system_agent
+):
     mock_user = User.objects.create_user(username="tester", password="pw")
 
     fake_agent.generate_title.return_value = mocker.Mock(content="Generated Title")
     fake_agent.analyze_text.return_value = mocker.Mock(content="Analysis Result")
 
-    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
+    mocker.patch(
+        "mentor.assistant.tasks.get_system_agent", return_value=fake_system_agent
+    )
+    mocker.patch("mentor.assistant.tasks.get_assistant_agent", return_value=fake_agent)
     mock_create_session = mocker.patch(
         "mentor.assistant.tasks.ChatSession.objects.create"
     )
@@ -89,9 +111,14 @@ def test_analyze_text_without_title_generates_title(mocker, fake_agent):
     assert result == "Analysis Result"
 
 
-def test_analyze_text_returns_none_if_title_generation_fails(mocker, fake_agent):
+def test_analyze_text_returns_none_if_title_generation_fails(
+    mocker, fake_agent, fake_system_agent
+):
     fake_agent.generate_title.return_value = None
-    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
+    mocker.patch(
+        "mentor.assistant.tasks.get_system_agent", return_value=fake_system_agent
+    )
+    mocker.patch("mentor.assistant.tasks.get_assistant_agent", return_value=fake_agent)
 
     result = tasks.analyze_text.run(
         user_id=123,
@@ -103,11 +130,16 @@ def test_analyze_text_returns_none_if_title_generation_fails(mocker, fake_agent)
     assert result is None
 
 
-def test_analyze_text_returns_none_if_user_does_not_exist(mocker, fake_agent):
+def test_analyze_text_returns_none_if_user_does_not_exist(
+    mocker, fake_agent, fake_system_agent
+):
     mock_user_get = mocker.patch("mentor.assistant.tasks.User.objects.get")
     mock_user_get.side_effect = User.DoesNotExist
 
-    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
+    mocker.patch(
+        "mentor.assistant.tasks.get_system_agent", return_value=fake_system_agent
+    )
+    mocker.patch("mentor.assistant.tasks.get_assistant_agent", return_value=fake_agent)
 
     result = tasks.analyze_text.run(
         user_id=999,
@@ -120,7 +152,8 @@ def test_analyze_text_returns_none_if_user_does_not_exist(mocker, fake_agent):
 
 
 def test_follow_up_question_returns_content(mocker, fake_agent):
-    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
+    mocker.patch("mentor.assistant.tasks.get_assistant_agent", return_value=fake_agent)
+    mocker.patch("mentor.assistant.tasks.ChatSession.objects.get")
 
     session_id = uuid.uuid4()
     question = "What is photosynthesis?"
@@ -140,7 +173,8 @@ def test_follow_up_question_returns_content(mocker, fake_agent):
 def test_follow_up_question_returns_none_if_response_is_none(mocker, fake_agent):
     fake_agent.follow_up_question.return_value = None
 
-    mocker.patch("mentor.assistant.tasks.get_agent", return_value=fake_agent)
+    mocker.patch("mentor.assistant.tasks.get_assistant_agent", return_value=fake_agent)
+    mocker.patch("mentor.assistant.tasks.ChatSession.objects.get")
 
     session_id = uuid.uuid4()
     question = "Another question"

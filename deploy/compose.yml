@@ -38,6 +38,8 @@ services:
       REDIS_URL: redis://redis:6379/0
     ports:
       - "8000:8000"
+    volumes:
+      - ../mentor:/mentor
     depends_on:
       - db
       - redis
@@ -53,6 +55,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       API_KEY: ${API_KEY?Please set the API_KEY environment variable}
       AI_PLATFORM: ${AI_PLATFORM:-together.ai}
+    volumes:
+      - ../mentor:/mentor
     depends_on:
       - redis
       - api

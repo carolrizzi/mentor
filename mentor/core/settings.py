@@ -133,7 +133,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        (
+            "mentor.core.auth.AutoLoginDevAuthentication",
+            "rest_framework_simplejwt.authentication.JWTAuthentication",
+        )
+        if DEBUG
+        else ("rest_framework_simplejwt.authentication.JWTAuthentication",)
     ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",

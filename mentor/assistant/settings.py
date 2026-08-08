@@ -58,5 +58,5 @@ class PostgreSettings(MentorBaseSettings):
     pg_host: str = "localhost"
     pg_port: int = 5432
     pg_username: str = "mentor"
-    pg_password: SecretStr
+    pg_password: SecretStr = SecretStr("mentor")
     pg_db_name: str = "mentor"

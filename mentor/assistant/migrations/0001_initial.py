@@ -4,6 +4,7 @@ import django.db.models.deletion
 import uuid
 from django.conf import settings
 from django.db import migrations, models
+from django.db.models.functions import Now
 
 
 class Migration(migrations.Migration):
@@ -54,7 +55,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("message", models.JSONField()),
-                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, db_default=Now()),
+                ),
                 (
                     "session",
                     models.ForeignKey(

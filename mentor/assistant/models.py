@@ -2,6 +2,7 @@ from uuid import uuid4
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.functions import Now
 
 
 class ChatSession(models.Model):
@@ -48,7 +49,9 @@ class ChatMessage(models.Model):
         + "message, use the 'type' key."
     )
     created_at = models.DateTimeField(
-        auto_now_add=True, help_text="Timestamp when the message was created."
+        auto_now_add=True,
+        db_default=Now(),
+        help_text="Timestamp when the message was created.",
     )
 
     class Meta:

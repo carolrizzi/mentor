@@ -42,3 +42,6 @@ cover/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Temp files
+temp
